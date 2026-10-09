@@ -59,6 +59,12 @@
                     </div>
                 </div>
 
+                <div class="flex justify-end">
+                    <button type="button" onclick="openForgotPasswordModal()" class="text-xs text-brand-olive hover:underline font-semibold">
+                        Esqueceu a senha?
+                    </button>
+                </div>
+
                 <div id="login-loading" class="hidden text-center text-xs text-brand-olive font-semibold py-1">
                     <i class="fa-solid fa-spinner fa-spin mr-1"></i> Conectando ao servidor seguro...
                 </div>
@@ -131,6 +137,25 @@
         </main>
     </div>
 
+    <!-- MODAL: ESQUECEU A SENHA -->
+    <div id="forgot-password-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-brand-dark">Recuperar Senha</h3>
+                <button onclick="closeForgotPasswordModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="text-xs text-gray-600 space-y-2">
+                <p>Por questões de segurança, a redefinição de senha do sistema é gerida internamente.</p>
+                <p>Entre em contacto com a administração do sistema para redefinir as suas credenciais.</p>
+            </div>
+
+            <div class="pt-3 flex justify-end border-t">
+                <button type="button" onclick="closeForgotPasswordModal()" class="px-4 py-2 bg-brand-olive text-white rounded-lg text-sm font-medium">Entendido</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: NOVO AGENDAMENTO -->
     <div id="appointment-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4">
@@ -188,7 +213,6 @@
 
     <!-- JAVASCRIPT SEGURO -->
     <script>
-        // ATENÇÃO: Substitua a URL abaixo pela URL exata gerada pelo Render para o seu back-end!
         const API_URL = 'https://backend-casa-de-patinhas.onrender.com';
 
         const businessHours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
@@ -234,6 +258,9 @@
                 icon.className = 'fa-solid fa-eye';
             }
         }
+
+        function openForgotPasswordModal() { document.getElementById('forgot-password-modal').classList.remove('hidden'); }
+        function closeForgotPasswordModal() { document.getElementById('forgot-password-modal').classList.add('hidden'); }
 
         function initStorage() {
             if (!localStorage.getItem('cp_appointments')) {
@@ -285,7 +312,7 @@
                     alert('Usuário ou senha incorretos!');
                 }
             } catch (err) {
-                alert('Erro ao conectar com o servidor seguro. Verifique a URL da API ou aguarde alguns segundos.');
+                alert('Erro ao conectar com o servidor seguro. Aguarde alguns segundos enquanto o servidor conecta.');
             } finally {
                 loading.classList.add('hidden');
                 btn.disabled = false;
