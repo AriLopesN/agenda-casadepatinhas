@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casa de Patinhas - Agenda Banho & Tosa</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            olive: '#5F684B',
+                            light: '#F4F0EA',
+                            rose: '#B58A73',
+                            dark: '#2C3023'
+                        },
+                        status: {
+                            agendado: '#3B82F6',   /* Azul */
+                            chegou: '#F97316',     /* Laranja */
+                            atendimento: '#EC4899',/* Rosa */
+                            finalizado: '#22C55E'  /* Verde */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light text-gray-800 font-sans min-h-screen">
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-view" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-brand-rose/20">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-olive text-white rounded-full mb-3 text-2xl">
+                    <i class="fa-solid fa-paw"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-brand-dark">Casa de Patinhas</h1>
+                <p class="text-sm text-gray-500">Banho & Tosa - Painel Interno</p>
+            </div>
+            
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mail / Usuário</label>
+                    <input type="text" id="login-user" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-olive focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                    <div class="relative">
+                        <input type="password" id="login-pass" required class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-olive focus:outline-none">
+                        <button type="button" onclick="togglePasswordVisibility('login-pass', 'toggle-login-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
+                            <i id="toggle-login-icon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="login-loading" class="hidden text-center text-xs text-brand-olive font-semibold py-1">
+                    <i class="fa-solid fa-spinner fa-spin mr-1"></i> Conectando ao servidor seguro...
+                </div>
+
+                <button type="submit" id="btn-login" class="w-full bg-brand-olive hover:bg-opacity-90 text-white font-medium py-2.5 rounded-lg transition duration-200 shadow-md">
+                    Entrar no Sistema
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAINEL PRINCIPAL (SISTEMA) -->
+    <div id="app-view" class="hidden min-h-screen flex flex-col">
+        
+        <!-- NAVEGAÇÃO / HEADER -->
+        <header class="bg-brand-olive text-white shadow-md">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-paw text-xl text-brand-rose"></i>
+                    <span class="font-bold text-lg tracking-wide">Casa de Patinhas</span>
+                </div>
+
+                <!-- NAVEGAÇÃO ENTRE ABAS -->
+                <div class="flex items-center bg-black/20 rounded-lg p-1 text-xs">
+                    <button id="nav-agenda" onclick="switchTab('agenda')" class="px-3 py-1.5 rounded-md font-medium bg-white text-brand-dark shadow">
+                        <i class="fa-solid fa-calendar-days mr-1"></i> Agenda
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <span id="user-display" class="text-xs bg-black/10 px-3 py-1.5 rounded-full"></span>
+                    <button onclick="handleLogout()" class="text-xs bg-red-500/80 hover:bg-red-600 px-2.5 py-1.5 rounded transition">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ABA: AGENDA -->
+        <main id="tab-agenda-content" class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
+            
+            <!-- BARRA DE CONTROLE DE DATA -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border">
+                <div class="flex items-center space-x-3">
+                    <button onclick="changeDate(-1)" class="p-2 border rounded-lg hover:bg-gray-50 text-gray-600"><i class="fa-solid fa-chevron-left"></i></button>
+                    <input type="date" id="filter-date" onchange="renderAppointments()" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-semibold focus:ring-2 focus:ring-brand-olive focus:outline-none">
+                    <button onclick="changeDate(1)" class="p-2 border rounded-lg hover:bg-gray-50 text-gray-600"><i class="fa-solid fa-chevron-right"></i></button>
+                    <button onclick="setToday()" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg font-medium text-gray-700">Hoje</button>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <button onclick="openAppointmentModal()" class="bg-brand-olive hover:bg-opacity-90 text-white text-sm font-medium px-4 py-2 rounded-lg shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Novo Agendamento
+                    </button>
+                </div>
+            </div>
+
+            <!-- LEGENDA DE STATUS -->
+            <div class="flex flex-wrap items-center gap-3 mb-6 text-xs font-semibold bg-white p-3 rounded-lg border">
+                <span class="text-gray-500">Legenda:</span>
+                <span class="px-2.5 py-1 rounded-full text-white bg-status-agendado">Agendado</span>
+                <span class="px-2.5 py-1 rounded-full text-white bg-status-chegou">Chegou na Casa</span>
+                <span class="px-2.5 py-1 rounded-full text-white bg-status-atendimento">Em Atendimento</span>
+                <span class="px-2.5 py-1 rounded-full text-white bg-status-finalizado">Finalizado</span>
+                <span class="px-2.5 py-1 rounded-full text-gray-600 bg-gray-100 border">Disponível</span>
+            </div>
+
+            <!-- GRADE DE HORÁRIOS DA AGENDA -->
+            <div id="schedule-timeline" class="space-y-3"></div>
+        </main>
+    </div>
+
+    <!-- MODAL: NOVO AGENDAMENTO -->
+    <div id="appointment-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-brand-dark">Agendar Atendimento</h3>
+                <button onclick="closeAppointmentModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="appointment-form" onsubmit="saveAppointment(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Nome do Pet *</label>
+                        <input type="text" id="app-pet-name" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Espécie / Raça</label>
+                        <input type="text" id="app-pet-breed" placeholder="Ex: Cão - Poodle" class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Nome do Tutor *</label>
+                        <input type="text" id="app-tutor-name" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">WhatsApp (com DDD) *</label>
+                        <input type="tel" id="app-tutor-phone" placeholder="11999999999" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Horário *</label>
+                        <select id="app-time" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Serviço *</label>
+                        <input type="text" id="app-service" placeholder="Ex: Banho & Tosa" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-red-600">Observação / Alerta do Pet (Opcional)</label>
+                    <input type="text" id="app-notes" placeholder="Ex: Alérgico a shampoo perfumado / Bravo" class="w-full border border-red-200 rounded-lg p-2 text-sm text-red-700 bg-red-50 focus:ring-1 focus:ring-red-400">
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2">
+                    <button type="button" onclick="closeAppointmentModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-olive text-white rounded-lg text-sm font-medium hover:bg-opacity-90">Salvar Agendamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT SEGURO -->
+    <script>
+        // ATENÇÃO: Substitua a URL abaixo pela URL exata gerada pelo Render para o seu back-end!
+        const API_URL = 'https://backend-casa-de-patinhas.onrender.com';
+
+        const businessHours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+        let currentUser = null;
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const defaultAppointments = [
+            {
+                id: '1',
+                date: todayStr,
+                time: '09:00',
+                petName: 'Thor',
+                breed: 'Golden Retriever',
+                tutorName: 'Ariadny',
+                tutorPhone: '11999998888',
+                service: 'Banho + Tosa Tesoura',
+                status: 'agendado',
+                notes: 'Pele sensível - Usar shampoo neutro'
+            },
+            {
+                id: '2',
+                date: todayStr,
+                time: '11:00',
+                petName: 'Mel',
+                breed: 'Shihtzu',
+                tutorName: 'Ariany',
+                tutorPhone: '11977776666',
+                service: 'Banho & Tosa Higiênica',
+                status: 'chegou',
+                notes: ''
+            }
+        ];
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function initStorage() {
+            if (!localStorage.getItem('cp_appointments')) {
+                localStorage.setItem('cp_appointments', JSON.stringify(defaultAppointments));
+            }
+            document.getElementById('filter-date').value = todayStr;
+            populateTimeDropdown();
+        }
+
+        function populateTimeDropdown() {
+            const select = document.getElementById('app-time');
+            select.innerHTML = '';
+            businessHours.forEach(hour => {
+                const opt = document.createElement('option');
+                opt.value = hour;
+                opt.innerText = hour;
+                select.appendChild(opt);
+            });
+        }
+
+        // AUTENTICAÇÃO SEGURA VIA BACK-END (RENDER)
+        async function handleLogin(e) {
+            e.preventDefault();
+            const userInput = document.getElementById('login-user').value.trim();
+            const passInput = document.getElementById('login-pass').value.trim();
+
+            const loading = document.getElementById('login-loading');
+            const btn = document.getElementById('btn-login');
+
+            loading.classList.remove('hidden');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user: userInput, pass: passInput })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser = data.user;
+                    document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.user})`;
+                    document.getElementById('login-view').classList.add('hidden');
+                    document.getElementById('app-view').classList.remove('hidden');
+                    renderAppointments();
+                } else {
+                    alert('Usuário ou senha incorretos!');
+                }
+            } catch (err) {
+                alert('Erro ao conectar com o servidor seguro. Verifique a URL da API ou aguarde alguns segundos.');
+            } finally {
+                loading.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('app-view').classList.add('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
+        }
+
+        function changeDate(days) {
+            const currentDateInput = document.getElementById('filter-date');
+            const currentDate = new Date(currentDateInput.value + 'T00:00:00');
+            currentDate.setDate(currentDate.getDate() + days);
+            currentDateInput.value = currentDate.toISOString().split('T')[0];
+            renderAppointments();
+        }
+
+        function setToday() {
+            document.getElementById('filter-date').value = todayStr;
+            renderAppointments();
+        }
+
+        function renderAppointments() {
+            const selectedDate = document.getElementById('filter-date').value;
+            const appointments = JSON.parse(localStorage.getItem('cp_appointments')) || [];
+            const timeline = document.getElementById('schedule-timeline');
+            
+            timeline.innerHTML = '';
+
+            const dayAppointments = appointments.filter(a => a.date === selectedDate);
+
+            businessHours.forEach(hour => {
+                const item = dayAppointments.find(a => a.time === hour);
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-4';
+
+                if (item) {
+                    const statusColors = {
+                        agendado: 'border-l-status-agendado bg-blue-50/40',
+                        chegou: 'border-l-status-chegou bg-orange-50/40',
+                        atendimento: 'border-l-status-atendimento bg-pink-50/40',
+                        finalizado: 'border-l-status-finalizado bg-green-50/40'
+                    };
+
+                    const cleanPhone = item.tutorPhone.replace(/\D/g, '');
+                    const waMessage = encodeURIComponent(`Olá ${item.tutorName}! Passando para avisar que o(a) ${item.petName} já está pronto(a) para buscar aqui na Casa de Patinhas! 🐾`);
+                    const waUrl = `https://api.whatsapp.com/send?phone=55${cleanPhone}&text=${waMessage}`;
+
+                    row.innerHTML = `
+                        <div class="w-16 text-right font-bold text-sm text-gray-700 flex-shrink-0">${hour}</div>
+                        <div class="flex-grow bg-white rounded-xl p-3 shadow-sm border border-gray-200 border-l-8 ${statusColors[item.status]} flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-base font-bold text-gray-800">${item.petName}</h4>
+                                    <span class="text-xs text-gray-500">(${item.breed || 'Não inf.'})</span>
+                                </div>
+                                <div class="text-xs text-gray-600 flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                                    <span><i class="fa-solid fa-user text-brand-olive mr-1"></i> ${item.tutorName}</span>
+                                    <span><i class="fa-solid fa-scissors text-brand-olive mr-1"></i> ${item.service}</span>
+                                </div>
+                                ${item.notes ? `<p class="text-xs text-red-600 font-semibold mt-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${item.notes}</p>` : ''}
+                            </div>
+
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <a href="${waUrl}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 font-medium shadow-sm">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i> Notificar
+                                </a>
+
+                                <select onchange="updateStatus('${item.id}', this.value)" class="text-xs border rounded-lg px-2 py-1 bg-white font-medium focus:outline-none">
+                                    <option value="agendado" ${item.status === 'agendado' ? 'selected' : ''}>Agendado</option>
+                                    <option value="chegou" ${item.status === 'chegou' ? 'selected' : ''}>Chegou</option>
+                                    <option value="atendimento" ${item.status === 'atendimento' ? 'selected' : ''}>Em Atendimento</option>
+                                    <option value="finalizado" ${item.status === 'finalizado' ? 'selected' : ''}>Finalizado</option>
+                                </select>
+
+                                <button onclick="deleteAppointment('${item.id}')" class="text-gray-300 hover:text-red-500 transition px-1"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <div class="w-16 text-right font-medium text-sm text-gray-400 flex-shrink-0">${hour}</div>
+                        <div class="flex-grow bg-white/60 rounded-xl p-3 border border-dashed border-gray-300 flex items-center justify-between hover:bg-white transition">
+                            <span class="text-xs font-semibold text-gray-400"><i class="fa-regular fa-circle-check mr-1 text-green-500"></i> Horário Livre</span>
+                            <button onclick="openAppointmentModal('${hour}')" class="text-xs text-brand-olive font-semibold hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-plus-circle"></i> Agendar
+                            </button>
+                        </div>
+                    `;
+                }
+
+                timeline.appendChild(row);
+            });
+        }
+
+        function updateStatus(id, newStatus) {
+            let appointments = JSON.parse(localStorage.getItem('cp_appointments')) || [];
+            appointments = appointments.map(a => a.id === id ? { ...a, status: newStatus } : a);
+            localStorage.setItem('cp_appointments', JSON.stringify(appointments));
+            renderAppointments();
+        }
+
+        function openAppointmentModal(selectedHour = null) { 
+            if (selectedHour) {
+                document.getElementById('app-time').value = selectedHour;
+            }
+            document.getElementById('appointment-modal').classList.remove('hidden'); 
+        }
+        
+        function closeAppointmentModal() { document.getElementById('appointment-modal').classList.add('hidden'); }
+
+        function saveAppointment(e) {
+            e.preventDefault();
+            const appointments = JSON.parse(localStorage.getItem('cp_appointments')) || [];
+            
+            const newApp = {
+                id: Date.now().toString(),
+                date: document.getElementById('filter-date').value,
+                petName: document.getElementById('app-pet-name').value,
+                breed: document.getElementById('app-pet-breed').value,
+                tutorName: document.getElementById('app-tutor-name').value,
+                tutorPhone: document.getElementById('app-tutor-phone').value,
+                time: document.getElementById('app-time').value,
+                service: document.getElementById('app-service').value,
+                notes: document.getElementById('app-notes').value,
+                status: 'agendado'
+            };
+
+            appointments.push(newApp);
+            localStorage.setItem('cp_appointments', JSON.stringify(appointments));
+            
+            document.getElementById('appointment-form').reset();
+            closeAppointmentModal();
+            renderAppointments();
+        }
+
+        function deleteAppointment(id) {
+            if (confirm('Tem certeza que deseja remover este agendamento?')) {
+                let appointments = JSON.parse(localStorage.getItem('cp_appointments')) || [];
+                appointments = appointments.filter(a => a.id !== id);
+                localStorage.setItem('cp_appointments', JSON.stringify(appointments));
+                renderAppointments();
+            }
+        }
+
+        window.onload = initStorage;
+    </script>
+</body>
+</html>
