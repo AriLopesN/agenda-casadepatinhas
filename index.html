@@ -59,6 +59,12 @@
                     </div>
                 </div>
 
+                <div class="flex justify-end">
+                    <button type="button" id="btn-forgot-pass" class="text-xs text-brand-olive hover:underline font-semibold">
+                        Esqueceu a senha?
+                    </button>
+                </div>
+
                 <div id="login-loading" class="hidden text-center text-xs text-brand-olive font-semibold py-1">
                     <i class="fa-solid fa-spinner fa-spin mr-1"></i> Conectando ao servidor...
                 </div>
@@ -81,8 +87,21 @@
                     <span class="font-bold text-lg tracking-wide">Casa de Patinhas</span>
                 </div>
 
+                <!-- ABAS DE NAVEGAÇÃO -->
+                <div class="flex items-center bg-black/20 rounded-lg p-1 text-xs">
+                    <button id="nav-agenda" class="px-3 py-1.5 rounded-md font-medium bg-white text-brand-dark shadow">
+                        <i class="fa-solid fa-calendar-days mr-1"></i> Agenda
+                    </button>
+                    <button id="nav-users" class="px-3 py-1.5 rounded-md font-medium hover:bg-white/10 transition text-white">
+                        <i class="fa-solid fa-users mr-1"></i> Usuários
+                    </button>
+                </div>
+
                 <div class="flex items-center space-x-3">
                     <span id="user-display" class="text-xs bg-black/10 px-3 py-1.5 rounded-full"></span>
+                    <button id="btn-open-change-pass" class="text-xs bg-white/20 hover:bg-white/30 px-2.5 py-1.5 rounded transition">
+                        <i class="fa-solid fa-key mr-1"></i> Mudar Senha
+                    </button>
                     <button id="btn-logout" class="text-xs bg-red-500/80 hover:bg-red-600 px-2.5 py-1.5 rounded transition">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
@@ -90,10 +109,8 @@
             </div>
         </header>
 
-        <!-- ABA: AGENDA -->
+        <!-- ABA 1: AGENDA -->
         <main id="tab-agenda-content" class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
-            
-            <!-- BARRA DE CONTROLE DE DATA -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border">
                 <div class="flex items-center space-x-3">
                     <button onclick="changeDate(-1)" class="p-2 border rounded-lg hover:bg-gray-50 text-gray-600"><i class="fa-solid fa-chevron-left"></i></button>
@@ -109,7 +126,6 @@
                 </div>
             </div>
 
-            <!-- LEGENDA DE STATUS -->
             <div class="flex flex-wrap items-center gap-3 mb-6 text-xs font-semibold bg-white p-3 rounded-lg border">
                 <span class="text-gray-500">Legenda:</span>
                 <span class="px-2.5 py-1 rounded-full text-white bg-status-agendado">Agendado</span>
@@ -119,9 +135,98 @@
                 <span class="px-2.5 py-1 rounded-full text-gray-600 bg-gray-100 border">Disponível</span>
             </div>
 
-            <!-- GRADE DE HORÁRIOS DA AGENDA -->
             <div id="schedule-timeline" class="space-y-3"></div>
         </main>
+
+        <!-- ABA 2: GESTÃO DE USUÁRIOS -->
+        <main id="tab-users-content" class="hidden max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+            <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border">
+                <div>
+                    <h2 class="text-lg font-bold text-brand-dark">Usuários do Sistema</h2>
+                    <p class="text-xs text-gray-500">Cadastre quem pode acessar a agenda do banho e tosa</p>
+                </div>
+                <button id="btn-open-new-user" class="bg-brand-olive hover:bg-opacity-90 text-white text-sm font-medium px-4 py-2 rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Novo Usuário
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 border-b text-gray-600 uppercase text-xs">
+                        <tr>
+                            <th class="py-3 px-4">Nome</th>
+                            <th class="py-3 px-4">Usuário / E-mail</th>
+                            <th class="py-3 px-4 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: ESQUECEU A SENHA -->
+    <div id="forgot-password-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-brand-dark">Recuperar Senha</h3>
+                <button id="btn-close-forgot" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="text-xs text-gray-600 space-y-2">
+                <p>Por questões de segurança, a redefinição de senha do sistema é gerida no servidor.</p>
+                <p>Entre em contacto com o administrador para redefinir as suas credenciais.</p>
+            </div>
+            <div class="pt-3 flex justify-end border-t">
+                <button id="btn-ok-forgot" class="px-4 py-2 bg-brand-olive text-white rounded-lg text-sm font-medium">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NOVO USUÁRIO -->
+    <div id="new-user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-brand-dark">Cadastrar Novo Usuário</h3>
+                <button id="btn-close-new-user" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <form id="new-user-form" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Nome Completo *</label>
+                    <input type="text" id="new-user-name" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Usuário / E-mail de Acesso *</label>
+                    <input type="text" id="new-user-username" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Senha *</label>
+                    <input type="password" id="new-user-password" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2 border-t">
+                    <button type="button" id="btn-cancel-new-user" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-olive text-white rounded-lg text-sm font-medium hover:bg-opacity-90">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ALTERAR SENHA -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <h3 class="text-lg font-bold text-brand-dark border-b pb-2">Alterar Senha</h3>
+            <form id="change-password-form" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Nova Senha</label>
+                    <input type="password" id="new-password" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" id="btn-cancel-change-pass" class="px-3 py-1.5 border rounded-lg text-xs">Cancelar</button>
+                    <button type="submit" class="px-3 py-1.5 bg-brand-olive text-white rounded-lg text-xs font-medium">Salvar</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- MODAL: NOVO AGENDAMENTO -->
@@ -179,7 +284,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT ISOLADO E PROTEGIDO -->
+    <!-- JAVASCRIPT PRINCIPAL -->
     <script>
         const API_URL = 'https://backend-casa-de-patinhas.onrender.com';
         const businessHours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
@@ -201,50 +306,91 @@
             }
         ];
 
-        // EVENTOS CONFIGURADOS APÓS O CARREGAMENTO
         document.addEventListener('DOMContentLoaded', () => {
             initStorage();
 
-            // Lógica do Olho de Mostrar/Esconder Senha
-            const btnToggle = document.getElementById('btn-toggle-pass');
-            if (btnToggle) {
-                btnToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const inputPass = document.getElementById('login-pass');
-                    const iconPass = document.getElementById('toggle-login-icon');
+            // Alternar Olho da Senha
+            document.getElementById('btn-toggle-pass').addEventListener('click', (e) => {
+                e.preventDefault();
+                const inputPass = document.getElementById('login-pass');
+                const iconPass = document.getElementById('toggle-login-icon');
+                if (inputPass.type === 'password') {
+                    inputPass.type = 'text';
+                    iconPass.className = 'fa-solid fa-eye-slash';
+                } else {
+                    inputPass.type = 'password';
+                    iconPass.className = 'fa-solid fa-eye';
+                }
+            });
 
-                    if (inputPass.type === 'password') {
-                        inputPass.type = 'text';
-                        iconPass.className = 'fa-solid fa-eye-slash';
-                    } else {
-                        inputPass.type = 'password';
-                        iconPass.className = 'fa-solid fa-eye';
-                    }
-                });
-            }
+            // Entrar no Sistema
+            document.getElementById('btn-login-submit').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await executeLogin();
+            });
 
-            // Lógica de Clique do Botão de Entrar
-            const btnSubmit = document.getElementById('btn-login-submit');
-            if (btnSubmit) {
-                btnSubmit.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    await executeLogin();
-                });
-            }
+            // Sair
+            document.getElementById('btn-logout').addEventListener('click', () => {
+                currentUser = null;
+                document.getElementById('app-view').classList.add('hidden');
+                document.getElementById('login-view').classList.remove('hidden');
+            });
 
-            // Evento de Logout
-            const btnLogout = document.getElementById('btn-logout');
-            if (btnLogout) {
-                btnLogout.addEventListener('click', () => {
-                    currentUser = null;
-                    document.getElementById('app-view').classList.add('hidden');
-                    document.getElementById('login-view').classList.remove('hidden');
-                });
-            }
+            // Esqueceu a Senha
+            const forgotModal = document.getElementById('forgot-password-modal');
+            document.getElementById('btn-forgot-pass').addEventListener('click', () => forgotModal.classList.remove('hidden'));
+            document.getElementById('btn-close-forgot').addEventListener('click', () => forgotModal.classList.add('hidden'));
+            document.getElementById('btn-ok-forgot').addEventListener('click', () => forgotModal.classList.add('hidden'));
+
+            // Abas (Agenda vs Usuários)
+            document.getElementById('nav-agenda').addEventListener('click', () => switchTab('agenda'));
+            document.getElementById('nav-users').addEventListener('click', () => switchTab('users'));
+
+            // Modal Novo Usuário
+            const newUserModal = document.getElementById('new-user-modal');
+            document.getElementById('btn-open-new-user').addEventListener('click', () => newUserModal.classList.remove('hidden'));
+            document.getElementById('btn-close-new-user').addEventListener('click', () => newUserModal.classList.add('hidden'));
+            document.getElementById('btn-cancel-new-user').addEventListener('click', () => newUserModal.classList.add('hidden'));
+
+            document.getElementById('new-user-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleCreateUser();
+            });
+
+            // Modal Mudar Senha
+            const changePassModal = document.getElementById('password-modal');
+            document.getElementById('btn-open-change-pass').addEventListener('click', () => changePassModal.classList.remove('hidden'));
+            document.getElementById('btn-cancel-change-pass').addEventListener('click', () => changePassModal.classList.add('hidden'));
+
+            document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleChangePassword();
+            });
         });
 
-        // EXECUÇÃO DO LOGIN
+        // TROCAR ABAS
+        function switchTab(tab) {
+            const navAgenda = document.getElementById('nav-agenda');
+            const navUsers = document.getElementById('nav-users');
+            const contentAgenda = document.getElementById('tab-agenda-content');
+            const contentUsers = document.getElementById('tab-users-content');
+
+            if (tab === 'agenda') {
+                navAgenda.className = "px-3 py-1.5 rounded-md font-medium bg-white text-brand-dark shadow";
+                navUsers.className = "px-3 py-1.5 rounded-md font-medium hover:bg-white/10 transition text-white";
+                contentAgenda.classList.remove('hidden');
+                contentUsers.classList.add('hidden');
+                renderAppointments();
+            } else {
+                navUsers.className = "px-3 py-1.5 rounded-md font-medium bg-white text-brand-dark shadow";
+                navAgenda.className = "px-3 py-1.5 rounded-md font-medium hover:bg-white/10 transition text-white";
+                contentUsers.classList.remove('hidden');
+                contentAgenda.classList.add('hidden');
+                fetchUsers();
+            }
+        }
+
+        // LOGIN VIA API DO RENDER
         async function executeLogin() {
             const userInput = document.getElementById('login-user').value.trim();
             const passInput = document.getElementById('login-pass').value.trim();
@@ -274,7 +420,7 @@
                     document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.user})`;
                     document.getElementById('login-view').classList.add('hidden');
                     document.getElementById('app-view').classList.remove('hidden');
-                    renderAppointments();
+                    switchTab('agenda');
                 } else {
                     alert('Usuário ou senha incorretos!');
                 }
@@ -286,6 +432,101 @@
             }
         }
 
+        // BUSCAR USUÁRIOS
+        async function fetchUsers() {
+            try {
+                const response = await fetch(`${API_URL}/api/users`);
+                const users = await response.json();
+                const tbody = document.getElementById('users-table-body');
+                tbody.innerHTML = '';
+
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 font-semibold text-gray-800">${u.name}</td>
+                        <td class="py-3 px-4 text-gray-600">${u.user}</td>
+                        <td class="py-3 px-4 text-right">
+                            ${u.user === currentUser.user ? 
+                                '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Você</span>' : 
+                                `<button onclick="deleteUser('${u.user}')" class="text-red-500 hover:text-red-700 text-xs font-medium"><i class="fa-solid fa-trash mr-1"></i> Excluir</button>`
+                            }
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // CADASTRAR USUÁRIO
+        async function handleCreateUser() {
+            const name = document.getElementById('new-user-name').value.trim();
+            const username = document.getElementById('new-user-username').value.trim();
+            const password = document.getElementById('new-user-password').value.trim();
+
+            try {
+                const response = await fetch(`${API_URL}/api/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, user: username, pass: password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Usuário cadastrado com sucesso!');
+                    document.getElementById('new-user-modal').classList.add('hidden');
+                    document.getElementById('new-user-name').value = '';
+                    document.getElementById('new-user-username').value = '';
+                    document.getElementById('new-user-password').value = '';
+                    fetchUsers();
+                } else {
+                    alert(data.message || 'Erro ao cadastrar usuário');
+                }
+            } catch (err) {
+                alert('Erro na conexão.');
+            }
+        }
+
+        // EXCLUIR USUÁRIO
+        async function deleteUser(username) {
+            if (confirm(`Tem certeza que deseja remover o usuário "${username}"?`)) {
+                try {
+                    await fetch(`${API_URL}/api/users/${username}`, { method: 'DELETE' });
+                    fetchUsers();
+                } catch (err) {
+                    alert('Erro ao excluir usuário');
+                }
+            }
+        }
+
+        // MUDAR SENHA
+        async function handleChangePassword() {
+            const newPass = document.getElementById('new-password').value.trim();
+
+            try {
+                const response = await fetch(`${API_URL}/api/change-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user: currentUser.user, newPass })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Sua senha foi alterada com sucesso no servidor!');
+                    document.getElementById('password-modal').classList.add('hidden');
+                    document.getElementById('new-password').value = '';
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Erro ao alterar senha.');
+            }
+        }
+
+        // LÓGICA DA AGENDA
         function initStorage() {
             if (!localStorage.getItem('cp_appointments')) {
                 localStorage.setItem('cp_appointments', JSON.stringify(defaultAppointments));
