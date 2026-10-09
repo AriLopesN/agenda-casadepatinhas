@@ -59,12 +59,6 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="button" onclick="openForgotPasswordModal()" class="text-xs text-brand-olive hover:underline font-semibold">
-                        Esqueceu a senha?
-                    </button>
-                </div>
-
                 <div id="login-loading" class="hidden text-center text-xs text-brand-olive font-semibold py-1">
                     <i class="fa-solid fa-spinner fa-spin mr-1"></i> Conectando ao servidor seguro...
                 </div>
@@ -92,10 +86,16 @@
                     <button id="nav-agenda" onclick="switchTab('agenda')" class="px-3 py-1.5 rounded-md font-medium bg-white text-brand-dark shadow">
                         <i class="fa-solid fa-calendar-days mr-1"></i> Agenda
                     </button>
+                    <button id="nav-users" onclick="switchTab('users')" class="px-3 py-1.5 rounded-md font-medium hover:bg-white/10 transition">
+                        <i class="fa-solid fa-users mr-1"></i> Usuários
+                    </button>
                 </div>
 
                 <div class="flex items-center space-x-3">
                     <span id="user-display" class="text-xs bg-black/10 px-3 py-1.5 rounded-full"></span>
+                    <button onclick="openChangePasswordModal()" class="text-xs bg-white/20 hover:bg-white/30 px-2.5 py-1.5 rounded transition">
+                        <i class="fa-solid fa-key mr-1"></i> Mudar Senha
+                    </button>
                     <button onclick="handleLogout()" class="text-xs bg-red-500/80 hover:bg-red-600 px-2.5 py-1.5 rounded transition">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
@@ -103,7 +103,7 @@
             </div>
         </header>
 
-        <!-- ABA: AGENDA -->
+        <!-- ABA 1: AGENDA -->
         <main id="tab-agenda-content" class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
             
             <!-- BARRA DE CONTROLE DE DATA -->
@@ -135,24 +135,88 @@
             <!-- GRADE DE HORÁRIOS DA AGENDA -->
             <div id="schedule-timeline" class="space-y-3"></div>
         </main>
+
+        <!-- ABA 2: GESTÃO DE USUÁRIOS -->
+        <main id="tab-users-content" class="hidden max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+            <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border">
+                <div>
+                    <h2 class="text-lg font-bold text-brand-dark">Usuários do Sistema</h2>
+                    <p class="text-xs text-gray-500">Cadastre quem pode acessar a agenda do banho e tosa</p>
+                </div>
+                <button onclick="openNewUserModal()" class="bg-brand-olive hover:bg-opacity-90 text-white text-sm font-medium px-4 py-2 rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Novo Usuário
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 border-b text-gray-600 uppercase text-xs">
+                        <tr>
+                            <th class="py-3 px-4">Nome</th>
+                            <th class="py-3 px-4">Usuário / E-mail</th>
+                            <th class="py-3 px-4 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y"></tbody>
+                </table>
+            </div>
+        </main>
     </div>
 
-    <!-- MODAL: ESQUECEU A SENHA -->
-    <div id="forgot-password-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <!-- MODAL: NOVO USUÁRIO -->
+    <div id="new-user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-brand-dark">Recuperar Senha</h3>
-                <button onclick="closeForgotPasswordModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <h3 class="text-lg font-bold text-brand-dark">Cadastrar Novo Usuário</h3>
+                <button onclick="closeNewUserModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
-            <div class="text-xs text-gray-600 space-y-2">
-                <p>Por questões de segurança, a redefinição de senha do sistema é gerida internamente.</p>
-                <p>Entre em contacto com a administração do sistema para redefinir as suas credenciais.</p>
-            </div>
+            <form onsubmit="handleCreateUser(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Nome Completo *</label>
+                    <input type="text" id="new-user-name" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Usuário / E-mail de Acesso *</label>
+                    <input type="text" id="new-user-username" required class="w-full border rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-olive">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Senha *</label>
+                    <div class="relative">
+                        <input type="password" id="new-user-password" required class="w-full border rounded-lg p-2 pr-10 text-sm focus:ring-1 focus:ring-brand-olive">
+                        <button type="button" onclick="togglePasswordVisibility('new-user-password', 'toggle-new-user-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
+                            <i id="toggle-new-user-icon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
-            <div class="pt-3 flex justify-end border-t">
-                <button type="button" onclick="closeForgotPasswordModal()" class="px-4 py-2 bg-brand-olive text-white rounded-lg text-sm font-medium">Entendido</button>
-            </div>
+                <div class="pt-3 flex justify-end space-x-2 border-t">
+                    <button type="button" onclick="closeNewUserModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-olive text-white rounded-lg text-sm font-medium hover:bg-opacity-90">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ALTERAR SENHA -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <h3 class="text-lg font-bold text-brand-dark border-b pb-2">Alterar Senha</h3>
+            <form onsubmit="handleChangePassword(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Nova Senha</label>
+                    <div class="relative">
+                        <input type="password" id="new-password" required class="w-full border rounded-lg p-2 pr-10 text-sm focus:ring-1 focus:ring-brand-olive">
+                        <button type="button" onclick="togglePasswordVisibility('new-password', 'toggle-change-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
+                            <i id="toggle-change-icon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeChangePasswordModal()" class="px-3 py-1.5 border rounded-lg text-xs">Cancelar</button>
+                    <button type="submit" class="px-3 py-1.5 bg-brand-olive text-white rounded-lg text-xs font-medium">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -211,7 +275,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT SEGURO -->
+    <!-- JAVASCRIPT SEGURO CONECTADO AO RENDER -->
     <script>
         const API_URL = 'https://backend-casa-de-patinhas.onrender.com';
 
@@ -259,8 +323,26 @@
             }
         }
 
-        function openForgotPasswordModal() { document.getElementById('forgot-password-modal').classList.remove('hidden'); }
-        function closeForgotPasswordModal() { document.getElementById('forgot-password-modal').classList.add('hidden'); }
+        function switchTab(tab) {
+            const navAgenda = document.getElementById('nav-agenda');
+            const navUsers = document.getElementById('nav-users');
+            const contentAgenda = document.getElementById('tab-agenda-content');
+            const contentUsers = document.getElementById('tab-users-content');
+
+            if (tab === 'agenda') {
+                navAgenda.className = "px-3 py-1.5 rounded-md font-medium bg-white text-brand-dark shadow";
+                navUsers.className = "px-3 py-1.5 rounded-md font-medium hover:bg-white/10 transition text-white";
+                contentAgenda.classList.remove('hidden');
+                contentUsers.classList.add('hidden');
+                renderAppointments();
+            } else {
+                navUsers.className = "px-3 py-1.5 rounded-md font-medium bg-white text-brand-dark shadow";
+                navAgenda.className = "px-3 py-1.5 rounded-md font-medium hover:bg-white/10 transition text-white";
+                contentUsers.classList.remove('hidden');
+                contentAgenda.classList.add('hidden');
+                fetchUsers();
+            }
+        }
 
         function initStorage() {
             if (!localStorage.getItem('cp_appointments')) {
@@ -281,7 +363,7 @@
             });
         }
 
-        // AUTENTICAÇÃO SEGURA VIA BACK-END (RENDER)
+        // LOGIN
         async function handleLogin(e) {
             e.preventDefault();
             const userInput = document.getElementById('login-user').value.trim();
@@ -307,12 +389,12 @@
                     document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.user})`;
                     document.getElementById('login-view').classList.add('hidden');
                     document.getElementById('app-view').classList.remove('hidden');
-                    renderAppointments();
+                    switchTab('agenda');
                 } else {
                     alert('Usuário ou senha incorretos!');
                 }
             } catch (err) {
-                alert('Erro ao conectar com o servidor seguro. Aguarde alguns segundos enquanto o servidor conecta.');
+                alert('Erro ao conectar com o servidor seguro.');
             } finally {
                 loading.classList.add('hidden');
                 btn.disabled = false;
@@ -323,6 +405,108 @@
             currentUser = null;
             document.getElementById('app-view').classList.add('hidden');
             document.getElementById('login-view').classList.remove('hidden');
+        }
+
+        // BUSCAR USUÁRIOS DO RENDER
+        async function fetchUsers() {
+            try {
+                const response = await fetch(`${API_URL}/api/users`);
+                const users = await response.json();
+                const tbody = document.getElementById('users-table-body');
+                tbody.innerHTML = '';
+
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 font-semibold text-gray-800">${u.name}</td>
+                        <td class="py-3 px-4 text-gray-600">${u.user}</td>
+                        <td class="py-3 px-4 text-right">
+                            ${u.user === currentUser.user ? 
+                                '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Você</span>' : 
+                                `<button onclick="deleteUser('${u.user}')" class="text-red-500 hover:text-red-700 text-xs font-medium"><i class="fa-solid fa-trash mr-1"></i> Excluir</button>`
+                            }
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function openNewUserModal() { document.getElementById('new-user-modal').classList.remove('hidden'); }
+        function closeNewUserModal() { document.getElementById('new-user-modal').classList.add('hidden'); }
+
+        // CRIAR NOVO USUÁRIO NO RENDER
+        async function handleCreateUser(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-user-name').value.trim();
+            const username = document.getElementById('new-user-username').value.trim();
+            const password = document.getElementById('new-user-password').value.trim();
+
+            try {
+                const response = await fetch(`${API_URL}/api/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, user: username, pass: password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Usuário cadastrado com sucesso!');
+                    closeNewUserModal();
+                    document.getElementById('new-user-name').value = '';
+                    document.getElementById('new-user-username').value = '';
+                    document.getElementById('new-user-password').value = '';
+                    fetchUsers();
+                } else {
+                    alert(data.message || 'Erro ao cadastrar usuário');
+                }
+            } catch (err) {
+                alert('Erro na conexão.');
+            }
+        }
+
+        // EXCLUIR USUÁRIO NO RENDER
+        async function deleteUser(username) {
+            if (confirm(`Tem certeza que deseja remover o usuário "${username}"?`)) {
+                try {
+                    await fetch(`${API_URL}/api/users/${username}`, { method: 'DELETE' });
+                    fetchUsers();
+                } catch (err) {
+                    alert('Erro ao excluir usuário');
+                }
+            }
+        }
+
+        // MUDAR SENHA NO RENDER
+        function openChangePasswordModal() { document.getElementById('password-modal').classList.remove('hidden'); }
+        function closeChangePasswordModal() { document.getElementById('password-modal').classList.add('hidden'); }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const newPass = document.getElementById('new-password').value.trim();
+
+            try {
+                const response = await fetch(`${API_URL}/api/change-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user: currentUser.user, newPass })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Sua senha foi alterada com sucesso no servidor!');
+                    closeChangePasswordModal();
+                    document.getElementById('new-password').value = '';
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Erro ao alterar senha.');
+            }
         }
 
         function changeDate(days) {
@@ -437,31 +621,4 @@
                 petName: document.getElementById('app-pet-name').value,
                 breed: document.getElementById('app-pet-breed').value,
                 tutorName: document.getElementById('app-tutor-name').value,
-                tutorPhone: document.getElementById('app-tutor-phone').value,
-                time: document.getElementById('app-time').value,
-                service: document.getElementById('app-service').value,
-                notes: document.getElementById('app-notes').value,
-                status: 'agendado'
-            };
-
-            appointments.push(newApp);
-            localStorage.setItem('cp_appointments', JSON.stringify(appointments));
-            
-            document.getElementById('appointment-form').reset();
-            closeAppointmentModal();
-            renderAppointments();
-        }
-
-        function deleteAppointment(id) {
-            if (confirm('Tem certeza que deseja remover este agendamento?')) {
-                let appointments = JSON.parse(localStorage.getItem('cp_appointments')) || [];
-                appointments = appointments.filter(a => a.id !== id);
-                localStorage.setItem('cp_appointments', JSON.stringify(appointments));
-                renderAppointments();
-            }
-        }
-
-        window.onload = initStorage;
-    </script>
-</body>
-</html>
+                tutorPhone: document.getElementById('app-tutor-phone').
